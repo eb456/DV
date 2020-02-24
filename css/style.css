@@ -1,0 +1,28 @@
+/*CSS file for d3 trees*/
+* {
+	font-family: sans-serif;
+}
+
+nav{
+	width: 100vw;
+	background-color: #D6EFFF
+	
+}
+
+ul{
+	margin: 0;
+	padding: 0;
+}
+
+li{
+	display: inline;
+	list-style-type: none;
+	margin: 0 2vw;
+}
+
+a{
+  text-decoration: none;
+  color: black;
+  padding: 2vw;
+  
+}

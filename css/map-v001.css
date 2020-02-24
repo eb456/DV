@@ -1,0 +1,41 @@
+/*CSS file for d3 maps*/
+
+
+
+text {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10px;
+  /*pointer-events: none;*/
+}
+.classCountry.key--SCT { fill: thistle; }
+.classCountry.key--WLS { fill: lightsteelblue; }
+.classCountry.key--NIR { fill: paleturquoise; }
+.classCountry.key--ENG { fill: pink; }
+.classCountry.key--IRL { fill: lightgrey; }
+.classCountry.highlight {  stroke: black;  }
+
+.classTown text {
+	text-anchor: start;
+	transform: translate(6px, 4px);
+	font-size: 10px;
+	fill: grey;
+} 	
+
+.classTown.highlight text {
+	font-size: 12px;
+	fill: black;
+} 
+.classTown circle {
+	stroke: grey;
+	fill: white;
+}	
+.classTown.highlight circle {
+	stroke: black;
+	fill: yellow;
+}
+
+
+
+
+
+

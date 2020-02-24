@@ -1,0 +1,20 @@
+/*CSS file for pie charts*/
+		html, body {
+			height: 100%;
+			width: 100%;
+			font-family: 'News Cycle', sans-serif;
+			font-size: 14pt;
+		}
+		* {
+			stroke-width: 20;
+		}
+
+		path {
+			opacity: 0.5;
+		}
+		
+		path:hover {
+			opacity: 1.0;
+			stroke-width: 2px;
+			stroke: #444444;
+		}

@@ -1,0 +1,16 @@
+
+
+/*==============================================
+ *
+ * CSS Stylesheet for overall styling  
+ *
+ * 04/09/2018	mjc	Created
+ *===============================================*/
+ 
+ 
+ html, body {
+	height: 100%;
+	width: 100%;
+	font-family: 'News Cycle', sans-serif;
+	font-size: 14pt;
+}

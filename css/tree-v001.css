@@ -1,0 +1,68 @@
+/*CSS file for d3 trees*/
+* {
+	font-family: sans-serif;
+}
+
+/* Group styling*/
+.cssClassNode {
+	cursor: pointer;
+}
+.cssClassNode :hover
+{
+	font: 14px sans-serif;
+}
+
+/* Link styling*/
+.cssClassLink {
+	fill: none;
+	stroke: steelblue;
+	stroke-width: 1.5px;
+	pointer-events: none;
+} 
+
+/* Circle styling*/
+.cssClassNode circle {
+	stroke: steelblue;
+	fill: plum;
+	stroke-width: 1.5px;
+}
+.leafNode circle {
+	fill: thistle;
+}
+.rootNode circle {
+	fill: violet;
+}
+.cssClassNode.highlight  circle {
+	stroke: black;
+	fill: yellow;
+	stroke-width: 1.5px;
+}
+
+
+/* Text styling*/
+.cssClassNode text {
+	fill: steelblue;
+	font: 10px sans-serif;
+} 
+.cssClassNode.rootNode text{
+	text-anchor: start;
+    transform: translate(-5px, -12px);
+}
+.cssClassNode.intermediateNode text{
+	text-anchor: middle;
+    transform: translate(0px, -12px);
+}
+.cssClassNode.leafNode text{
+	text-anchor: start;
+    transform: translate(12px, 0px);
+}
+.cssClassNode.highlight text {
+	fill: black;
+	font: 12px sans-serif;
+} 
+
+
+
+
+
+

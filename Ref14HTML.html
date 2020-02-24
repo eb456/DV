@@ -1,0 +1,211 @@
+<!--------------------------------------------------------------------
+
+   Module: REF 14 Results Dashboard
+
+   Author:
+
+   What it does:
+
+   Version history
+  	v001	03/10/2018	mjc	Created.
+
+---------------------------------------------------------------------->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<!--Title-->
+	<title>Ref 14 Results Dashboard </title>
+	<!--d3V4-->
+	<script type="text/javascript" src="d3/d3.v4.js"></script>
+	<!--Model Class-->
+	<script src="lib/model/Ref14Model.js"></script>
+	<script src="lib/views/map.js"></script>
+	<!--Stylesheets-->
+	<link rel="stylesheet" type="text/css" href="css/Ref14CSS.css"/>
+	<!--View Class-->
+	<script src="lib/views/Ref14BarchartView.js"></script>
+	<script src="http://d3js.org/topojson.v1.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/map-v001.css"/>
+</head>
+
+<body>
+	<h1>Ref14 Results Dashboard</h1>
+	<h2>Director of Research</h2>
+
+	<h3>Select Unit Of Assessment: </h3>
+	<div ID="dropDownDIV"><h3> Select UoA: </h3></div>
+
+	<h2>Barchart 1</h2>
+	<div ID=barchart1></div>
+
+	<h2>Map</h2>
+	<div ID=mapdiv></div>
+
+	<h2>Stacked Barchart</h2>
+	<div ID=stackedbarchart></div>
+
+<script type="text/javascript">
+"use strict"
+
+
+var bc1; //Barchart 1
+var dm1 = modelConstructor()        //Create datamodel object (gives access to methods in ref14model.js etc )
+var dataModel; //shorthand for dm1.model() and declared as nasty outer block variable for easy access from console.
+var map;
+var countries;
+var towns;
+//=============== READ DATA FILES ================================
+
+
+d3.queue()
+	.defer(d3.csv, "data/topics/REF2014T30TopicOrder.csv")
+	.defer(d3.csv, "data/290183_REF_Contextual_table_1314_0.csv")
+	.defer(d3.csv, "data/learning-providers-plus.csv")
+	.defer(d3.json, "data/topics/REF2014T30Python.json")
+	.defer(d3.json, "maps/uk.json")
+	.await(initialiseApp)
+
+//======================== MAIN FUNCTION =================================
+//Carries out all initialization and setup
+function initialiseApp(error, ref14data, ref14context , learningProviders, jsonTopicData, uk){
+
+	//Check data files have loaded
+	if ( error ) {console.log (" there are errors with loading the data: ", error); return;}
+
+	//Draw the map
+	countries = topojson.feature(uk, uk.objects.subunits).features;
+
+	map = map("#mapdiv")
+		.loadAndRenderMap(countries)
+		.overrideTownLongLatAccessor(longLatAccessor)
+		.overrideTownNameAccessor(d=>firstCaps(d.key));
+
+	//Create model
+	dm1.loadData(ref14data, ref14context , learningProviders, jsonTopicData);
+	dataModel = dm1.model();
+
+	//Group REF entries b town
+	var townGroups = d3.nest()
+						.key(e=>e.lp.TOWN)
+						.entries(dataModel.refEntries);
+
+	map.loadAndRenderTowns(townGroups);
+
+	function firstCaps(name) {return name[0] + name.slice(1).toLowerCase()};
+	
+	function longLatAccessor(d) {
+		//Will assume (eek!) that first REF entry in a town group 
+		//contains valid lat and long
+		var latitude = d.values[0].lp.LATITUDE;
+		var longitude = d.values[0].lp.LONGITUDE;
+		return [longitude, latitude]
+	}
+
+//Organise (nest) alphabetically by UOA (get list for dropdown)
+	var uoas = d3.nest()
+		.key(function(d) { return d.UoAString; })
+			.sortKeys(d3.ascending)
+		.entries(dataModel.refEntries);
+	uoas = uoas.map(e => e.key)
+	
+//Add UOA drop-down
+  var uoaSelect = d3.select('#dropDownDIV')
+	  .append('select')
+		.attr('id','selectID')
+		.on('change',onUoaChange)
+
+	renderUoaOptionsDropdown(uoas, uoaSelect);
+
+
+
+
+//=====================BARCHART==============================================
+
+	bc1 = barchart("#barchart1")
+		//.appendClickFunction(barClickFunction) not sure if need this.
+		.overrideDataFieldFunction(e => Number(e.environment["4*"])) //Use the 4* assessment as the bar size
+		.overrideKeyFunction(e => e["Institution name"])
+		.overrideTooltipFunction(e => {return e["Institution name"] + ", " + "Region provider: " + e.context.regionProvider + ", 4* = " + e.environment["4*"];})
+		.appendedMouseOverFunction(highlightTownsInMap) 
+		.appendedMouseOutFunction(removeHighlighting)
+		.maxValueOfDataField(100); 
+
+renderUoAData(uoas[0]);
+
+	var uniClassesToHighlight;
+
+	function highlightTownsInMap(d){
+		//Get Uni name of clicked bar
+		var clickedUni = d["Institution Name"];
+		//Get list of REF entries with this UoA		
+		var mapEntriesWithThisName = key
+			.filter(e=>e.key == clickedUni);
+		//Extract list of cleaned university (institution) class names 
+		//uniClassesToHighlight = mapEntriesWithThisName
+			//.map(function(e){
+			//	return ".nest-key--"+e["Institution name"].replace(/[\W]+/g,"_")
+			}
+
+		//Highlight those bars
+		uniClassesToHighlight.forEach(function(uniClass){
+			d3.selectAll(uniClass).classed ("highlight", true)
+		})
+	
+	
+	function removeHighlighting (d){
+		uniClassesToHighlight.forEach(function(uniClass){
+			d3.selectAll(uniClass).classed ("highlight", false)
+		})	
+	}
+
+}
+
+	//======================== HELPER FUNCTIONS =================================
+	function renderUoAData(uoas){
+
+
+	var bc1Data = dataModel.refEntries
+		.filter(e => e.UoAString == uoas)	
+		.sort((a, b) => d3.ascending(
+			a["UoAString with Multiple submission letter appended"], 
+			b["UoAString with Multiple submission letter appended"]
+		))
+		
+	//Render the barchart
+	bc1.loadAndRenderDataset(bc1Data);
+	
+	
+}
+	function onUoaChange() {
+		var selectedUoa = d3.select('#selectID').property('value')
+		renderUoAData(selectedUoa);
+	};
+
+
+	function renderUoaOptionsDropdown(uoas, uoaSelect){
+
+		var uoaOptions = uoaSelect //Select and bind
+			.selectAll('.uoaOptionClass')
+			.data(uoas);
+
+		uoaOptions //Enter Selection
+			.enter()
+			.append('option')
+			.classed("uoaOptionClass", true)
+			.text(function (d) { return d; })
+		uoaOptions  //Update Selection
+			.text(function (d) { return d; })
+		uoaOptions  //Exit Selection
+			.exit()
+			.remove();
+	}
+
+
+	
+		
+
+</script>
+</body>
+</html>

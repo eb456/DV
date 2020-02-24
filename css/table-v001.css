@@ -1,0 +1,17 @@
+
+
+/*==============================================
+ *
+ * CSS Stylesheet for tables  
+ *
+ * 04/09/2018	mjc	Created
+ *===============================================*/
+ 
+ 
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
